@@ -29,7 +29,6 @@
 #include "query-assign.h"
 #include "msg.h"
 #include "nvgetopt.h"
-#include "glxinfo.h"
 
 #include "NvCtrlAttributes.h"
 
@@ -227,8 +226,6 @@ Options *parse_command_line(int argc, char *argv[],
     int boolval;
 
     op = nvalloc(sizeof(Options));
-    op->config = DEFAULT_RC_FILE;
-    op->write_config = NV_TRUE;
 
     /*
      * initialize the controlled display to the gui display name
@@ -248,43 +245,7 @@ Options *parse_command_line(int argc, char *argv[],
         switch (c) {
         case 'v': print_version(); exit(0); break;
         case 'h': print_help(); exit(0); break;
-        case 'l': op->only_load = 1; break;
-        case 'n': op->no_load = 1; break;
-        case 'r': op->rewrite = 1; break;
         case 'c': op->ctrl_display = strval; break;
-        case DISPLAY_OPTION:
-            /*
-             * --ctrl-display and --display can both be specified so only assign
-             * --display to ctrl_display if it is not yet assigned.
-             */
-            if (!op->ctrl_display) {
-                op->ctrl_display = strval;
-            }
-            break;
-        case 'p': op->page = strval; break;
-        case 'V':
-            nv_set_verbosity(NV_VERBOSITY_DEFAULT);
-            if (!strval) {
-                /* user didn't give argument, assume "all" */
-                nv_set_verbosity(NV_VERBOSITY_ALL);
-            } else if (nv_strcasecmp(strval, "none") == NV_TRUE) {
-                nv_set_verbosity(NV_VERBOSITY_NONE);
-            } else if (nv_strcasecmp(strval, "errors") == NV_TRUE) {
-                nv_set_verbosity(NV_VERBOSITY_ERROR);
-            } else if (nv_strcasecmp(strval, "deprecations") == NV_TRUE) {
-                nv_set_verbosity(NV_VERBOSITY_DEPRECATED);
-            } else if (nv_strcasecmp(strval, "warnings") == NV_TRUE) {
-                nv_set_verbosity(NV_VERBOSITY_WARNING);
-            } else if (nv_strcasecmp(strval, "all") == NV_TRUE) {
-                nv_set_verbosity(NV_VERBOSITY_ALL);
-            } else {
-                nv_error_msg("Invalid verbosity level '%s'.  Please run "
-                             "`%s --help` for usage information.\n",
-                             strval, argv[0]);
-                exit(0);
-            }
-            set_dynamic_verbosity(NV_FALSE);
-            break;
         case 'a':
             n = op->num_assignments;
             op->assignments = nvrealloc(op->assignments,
@@ -298,27 +259,15 @@ Options *parse_command_line(int argc, char *argv[],
             op->queries[n] = strval;
             op->num_queries++;
             break;
-        case CONFIG_FILE_OPTION: op->config = strval; break;
-        case 'g': print_glxinfo(NULL, systems); exit(0); break;
-        case 'E': print_eglinfo(NULL, systems); exit(0); break;
         case 't': op->terse = NV_TRUE; break;
         case 'd': op->dpy_string = NV_TRUE; break;
         case 'e': print_attribute_help(strval); exit(0); break;
-        case 'L': op->list_targets = NV_TRUE; break;
-        case 'w': op->write_config = boolval; break;
-        case 'i': op->use_gtk2 = NV_TRUE; break;
-        case 'I': op->gtk_lib_path = strval; break;
         default:
             nv_error_msg("Invalid commandline, please run `%s --help` "
                          "for usage information.\n", argv[0]);
             exit(0);
         }
     }
-
-    /* do tilde expansion on the config file path */
-
-    op->config = tilde_expansion(op->config);
-    
     return op;
 
 } /* parse_command_line() */

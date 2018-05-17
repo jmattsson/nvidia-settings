@@ -205,58 +205,6 @@ NvCtrlAttributeHandle *NvCtrlAttributeInit(CtrlSystem *system,
     }
 
     /*
-     * initialize X Screen specific attributes for X Screen
-     * target types.
-     */
-
-    if (target_type == X_SCREEN_TARGET) {
-
-        /*
-         * initialize the XF86VidMode attributes; it is OK if this
-         * fails
-         */
-        
-        if (subsystems & NV_CTRL_ATTRIBUTES_XF86VIDMODE_SUBSYSTEM) {
-            h->vm = NvCtrlInitVidModeAttributes(h);
-        }
-        
-        /*
-         * initialize the XVideo extension and attributes; it is OK if
-         * this fails
-         */
-        
-        if (subsystems & NV_CTRL_ATTRIBUTES_XVIDEO_SUBSYSTEM) {
-            h->xv = NvCtrlInitXvAttributes(h);
-        }
-        
-        /*
-         * initialize the GLX extension and attributes; it is OK if
-         * this fails
-         */
-        
-        if (subsystems & NV_CTRL_ATTRIBUTES_GLX_SUBSYSTEM) {
-            h->glx = NvCtrlInitGlxAttributes(h);
-        }
-        
-        /*
-         * initialize the EGL extension and attributes; it is OK if
-         * this fails
-         */
-        
-        if (subsystems & NV_CTRL_ATTRIBUTES_EGL_SUBSYSTEM) {
-            h->egl = NvCtrlInitEglAttributes(h);
-        }
-    } /* X Screen target type attribute subsystems */
-
-    /*
-     * initialize the XRandR extension and attributes; this does not
-     * require an X screen and it is OK if this fails
-     */
-    if (subsystems & NV_CTRL_ATTRIBUTES_XRANDR_SUBSYSTEM) {
-        h->xrandr = NvCtrlInitXrandrAttributes(h);
-    }
-
-    /*
      * initialize NVML-specific attributes for NVML-related target types.
      */
 
@@ -284,12 +232,6 @@ void NvCtrlRebuildSubsystems(CtrlTarget *ctrl_target, unsigned int subsystem)
     if (h == NULL) {
         return;
     }
-
-    if (subsystem & NV_CTRL_ATTRIBUTES_XRANDR_SUBSYSTEM) {
-        NvCtrlXrandrAttributesClose(h);
-        h->xrandr = NvCtrlInitXrandrAttributes(h);
-    }
-
 }
 
 
@@ -749,23 +691,10 @@ ReturnStatus NvCtrlGetDisplayAttribute64(const CtrlTarget *ctrl_target,
         switch (attr) {
           case NV_CTRL_ATTR_EXT_NV_PRESENT:
             *val = (h->nv) ? True : False; break;
-          case NV_CTRL_ATTR_EXT_VM_PRESENT:
-            *val = (h->vm) ? True : False; break;
-          case NV_CTRL_ATTR_EXT_XV_OVERLAY_PRESENT:
-            *val = h->xv && h->xv->overlay; break;
-          case NV_CTRL_ATTR_EXT_XV_TEXTURE_PRESENT:
-            *val = h->xv && h->xv->texture; break;
-          case NV_CTRL_ATTR_EXT_XV_BLITTER_PRESENT:
-            *val = h->xv && h->xv->blitter; break;
           default:
             return NvCtrlNoAttribute;
         }
         return NvCtrlSuccess;
-    }
-
-    if (attr >= NV_CTRL_ATTR_RANDR_BASE &&
-        attr <= NV_CTRL_ATTR_RANDR_LAST_ATTRIBUTE) {
-        return NvCtrlXrandrGetAttribute(h, display_mask, attr, val);
     }
 
     if (((attr >= 0) && (attr <= NV_CTRL_LAST_ATTRIBUTE)) ||
@@ -879,20 +808,6 @@ ReturnStatus NvCtrlGetVoidDisplayAttribute(const CtrlTarget *ctrl_target,
         return NvCtrlBadHandle;
     }
 
-    if ( attr >= NV_CTRL_ATTR_GLX_BASE &&
-         attr <= NV_CTRL_ATTR_GLX_LAST_ATTRIBUTE ) {
-        if ( !(h->glx) ) return NvCtrlMissingExtension;
-        return NvCtrlGlxGetVoidAttribute(h, display_mask, attr, ptr);
-    }
-
-    if ( attr >= NV_CTRL_ATTR_EGL_BASE &&
-         attr <= NV_CTRL_ATTR_EGL_LAST_ATTRIBUTE ) {
-        if (!(h->egl)) {
-            return NvCtrlMissingExtension;
-        }
-        return NvCtrlEglGetVoidAttribute(h, display_mask, attr, ptr);
-    }
-
     return NvCtrlNoAttribute;
 
 } /* NvCtrlGetVoidDisplayAttribute() */
@@ -950,7 +865,7 @@ NvCtrlGetValidDisplayAttributeValues(const CtrlTarget *ctrl_target,
 /*
  * GetValidStringDisplayAttributeValuesExtraAttr() -fill the
  * CtrlAttributeValidValues strucure for extra string atrributes i.e.
- * NvCtrlNvControl*, NvCtrlGlx*, NvCtrlXrandr*, NvCtrlVidMode*, or NvCtrlXv*.
+ * NvCtrlNvControl*.
  */
 
 static ReturnStatus
@@ -1032,30 +947,6 @@ NvCtrlGetValidStringDisplayAttributeValues(const CtrlTarget *ctrl_target,
         return GetValidStringDisplayAttributeValuesExtraAttr(val);
     }
 
-    if ((attr >= NV_CTRL_STRING_GLX_BASE) &&
-        (attr <= NV_CTRL_STRING_GLX_LAST_ATTRIBUTE)) {
-        if (!h->glx) return NvCtrlMissingExtension;
-        return GetValidStringDisplayAttributeValuesExtraAttr(val);
-    }
-
-    if ((attr >= NV_CTRL_STRING_XRANDR_BASE) &&
-        (attr <= NV_CTRL_STRING_XRANDR_LAST_ATTRIBUTE)) {
-        if (!h->xrandr) return NvCtrlMissingExtension;
-        return GetValidStringDisplayAttributeValuesExtraAttr(val);
-    }
-
-    if ((attr >= NV_CTRL_STRING_XF86VIDMODE_BASE) &&
-        (attr <= NV_CTRL_STRING_XF86VIDMODE_LAST_ATTRIBUTE)) {
-        if (!h->vm) return NvCtrlMissingExtension;
-        return GetValidStringDisplayAttributeValuesExtraAttr(val);
-    }
-
-    if ((attr >= NV_CTRL_STRING_XV_BASE) &&
-        (attr <= NV_CTRL_STRING_XV_LAST_ATTRIBUTE)) {
-        if (!h->xv) return NvCtrlMissingExtension;
-        return GetValidStringDisplayAttributeValuesExtraAttr(val);
-    }
-
     return NvCtrlNoAttribute;
 
 } /* NvCtrlGetValidStringDisplayAttributeValues() */
@@ -1101,36 +992,6 @@ ReturnStatus NvCtrlGetStringDisplayAttribute(const CtrlTarget *ctrl_target,
                 (attr <= NV_CTRL_STRING_NV_CONTROL_LAST_ATTRIBUTE)) {
                 if (!h->nv) return NvCtrlMissingExtension;
                 return NvCtrlNvControlGetStringAttribute(h, display_mask, attr, ptr);
-            }
-
-            if ((attr >= NV_CTRL_STRING_GLX_BASE) &&
-                (attr <= NV_CTRL_STRING_GLX_LAST_ATTRIBUTE)) {
-                if (!h->glx) return NvCtrlMissingExtension;
-                return NvCtrlGlxGetStringAttribute(h, display_mask, attr, ptr);
-            }
-
-            if ((attr >= NV_CTRL_STRING_EGL_BASE) &&
-                (attr <= NV_CTRL_STRING_EGL_LAST_ATTRIBUTE)) {
-                if (!h->egl) return NvCtrlMissingExtension;
-                return NvCtrlEglGetStringAttribute(h, display_mask, attr, ptr);
-            }
-
-            if ((attr >= NV_CTRL_STRING_XRANDR_BASE) &&
-                (attr <= NV_CTRL_STRING_XRANDR_LAST_ATTRIBUTE)) {
-                if (!h->xrandr) return NvCtrlMissingExtension;
-                return NvCtrlXrandrGetStringAttribute(h, display_mask, attr, ptr);
-            }
-
-            if ((attr >= NV_CTRL_STRING_XF86VIDMODE_BASE) &&
-                (attr <= NV_CTRL_STRING_XF86VIDMODE_LAST_ATTRIBUTE)) {
-                if (!h->vm) return NvCtrlMissingExtension;
-                return NvCtrlVidModeGetStringAttribute(h, display_mask, attr, ptr);
-            }
-
-            if ((attr >= NV_CTRL_STRING_XV_BASE) &&
-                (attr <= NV_CTRL_STRING_XV_LAST_ATTRIBUTE)) {
-                if (!h->xv) return NvCtrlMissingExtension;
-                return NvCtrlXvGetStringAttribute(h, display_mask, attr, ptr);
             }
 
             return NvCtrlNoAttribute;
@@ -1286,19 +1147,6 @@ void NvCtrlAttributeClose(NvCtrlAttributeHandle *handle)
      * XXX should free any additional resources allocated by each
      * subsystem
      */
-
-    if ( h->glx ) {
-        NvCtrlGlxAttributesClose(h);   
-    }
-    if ( h->egl ) {
-        NvCtrlEglAttributesClose(h);
-    }
-    if ( h->xrandr ) {
-        NvCtrlXrandrAttributesClose(h);   
-    }
-    if ( h->xv ) {
-        NvCtrlXvAttributesClose(h);
-    }
     if ( h->nvml ) {
         NvCtrlNvmlAttributesClose(h);
     }
@@ -1393,259 +1241,6 @@ const char *NvCtrlGetStereoModeName(int stereo_mode)
 }
 
 
-ReturnStatus NvCtrlGetColorAttributes(const CtrlTarget *ctrl_target,
-                                      float contrast[3],
-                                      float brightness[3],
-                                      float gamma[3])
-{
-    const NvCtrlAttributePrivateHandle *h = getPrivateHandleConst(ctrl_target);
-
-    if (h == NULL) {
-        return NvCtrlBadHandle;
-    }
-
-    switch (h->target_type) {
-    case X_SCREEN_TARGET:
-        return NvCtrlVidModeGetColorAttributes(h, contrast, brightness, gamma);
-    case DISPLAY_TARGET:
-        return NvCtrlXrandrGetColorAttributes(h, contrast, brightness, gamma);
-    default:
-        return NvCtrlBadHandle;
-    }
-}
-
-ReturnStatus NvCtrlSetColorAttributes(CtrlTarget *ctrl_target,
-                                      float c[3],
-                                      float b[3],
-                                      float g[3],
-                                      unsigned int bitmask)
-{
-    ReturnStatus status;
-    int val = 0;
-
-    NvCtrlAttributePrivateHandle *h = getPrivateHandle(ctrl_target);
-
-    if (h == NULL) {
-        return NvCtrlBadHandle;
-    }
-
-    status = NvCtrlGetAttribute(ctrl_target,
-                                NV_CTRL_ATTR_RANDR_GAMMA_AVAILABLE,
-                                &val);
-
-    if (status == NvCtrlSuccess && val) {
-        switch (h->target_type) {
-        case X_SCREEN_TARGET:
-            return NvCtrlVidModeSetColorAttributes(h, c, b, g, bitmask);
-        case DISPLAY_TARGET:
-            return NvCtrlXrandrSetColorAttributes(h, c, b, g, bitmask);
-        default:
-            return NvCtrlBadHandle;
-        }
-    } else if ((status != NvCtrlSuccess || !val) &&
-               h->target_type == NV_CTRL_TARGET_TYPE_X_SCREEN) {
-        return NvCtrlVidModeSetColorAttributes(h, c, b, g, bitmask);
-    }
-
-    return NvCtrlError;
-}
-
-
-ReturnStatus NvCtrlGetColorRamp(const CtrlTarget *ctrl_target,
-                                unsigned int channel,
-                                uint16_t **lut,
-                                int *n)
-{
-    const NvCtrlAttributePrivateHandle *h = getPrivateHandleConst(ctrl_target);
-
-    if (h == NULL) {
-        return NvCtrlBadHandle;
-    }
-
-    switch (h->target_type) {
-    case X_SCREEN_TARGET:
-        return NvCtrlVidModeGetColorRamp(h, channel, lut, n);
-    case DISPLAY_TARGET:
-        return NvCtrlXrandrGetColorRamp(h, channel, lut, n);
-    default:
-        return NvCtrlBadHandle;
-    }
-}
-
-
-ReturnStatus NvCtrlReloadColorRamp(CtrlTarget *ctrl_target)
-{
-    NvCtrlAttributePrivateHandle *h = getPrivateHandle(ctrl_target);
-
-    if (h == NULL) {
-        return NvCtrlBadHandle;
-    }
-
-    switch (h->target_type) {
-    case X_SCREEN_TARGET:
-        return NvCtrlVidModeReloadColorRamp(h);
-    case DISPLAY_TARGET:
-        return NvCtrlXrandrReloadColorRamp(h);
-    default:
-        return NvCtrlBadHandle;
-    }
-}
-
-
-/* helper functions private to the libXNVCtrlAttributes backend */
-
-void NvCtrlInitGammaInputStruct(NvCtrlGammaInput *pGammaInput)
-{
-    int ch;
-
-    for (ch = FIRST_COLOR_CHANNEL; ch <= LAST_COLOR_CHANNEL; ch++) {
-        pGammaInput->brightness[ch] = BRIGHTNESS_DEFAULT;
-        pGammaInput->contrast[ch]   = CONTRAST_DEFAULT;
-        pGammaInput->gamma[ch]      = GAMMA_DEFAULT;
-    }
-}
-
-/*
- * Compute the gammaRamp entry given its index, and the contrast,
- * brightness, and gamma.
- */
-static unsigned short ComputeGammaRampVal(int gammaRampSize,
-                                          int i,
-                                          float contrast,
-                                          float brightness,
-                                          float gamma)
-{
-    double j, half, scale;
-    int shift, val, num;
-
-    num = gammaRampSize - 1;
-    shift = 16 - (ffs(gammaRampSize) - 1);
-
-    scale = (double) num / 3.0; /* how much brightness and contrast
-                                   affect the value */
-    j = (double) i;
-
-    /* contrast */
-
-    contrast *= scale;
-
-    if (contrast > 0.0) {
-        half = ((double) num / 2.0) - 1.0;
-        j -= half;
-        j *= half / (half - contrast);
-        j += half;
-    } else {
-        half = (double) num / 2.0;
-        j -= half;
-        j *= (half + contrast) / half;
-        j += half;
-    }
-
-    /* brightness */
-
-    brightness *= scale;
-
-    j += brightness;
-    if (j > (double)num) {
-        j = (double)num;
-    }
-    if (j < 0.0) {
-        j = 0.0;
-    }
-
-    /* gamma */
-
-    gamma = 1.0 / (double) gamma;
-
-    if (gamma == 1.0) {
-        val = (int) j;
-    } else {
-        val = (int) (pow (j / (double)num, gamma) * (double)num + 0.5);
-    }
-
-    val <<= shift;
-    return (unsigned short) val;
-}
-
-void NvCtrlUpdateGammaRamp(const NvCtrlGammaInput *pGammaInput,
-                           int gammaRampSize,
-                           unsigned short *gammaRamp[3],
-                           unsigned int bitmask)
-{
-    int i, ch;
-
-    /* update the requested channels within the gammaRamp */
-
-    for (ch = FIRST_COLOR_CHANNEL; ch <= LAST_COLOR_CHANNEL; ch++) {
-
-        /* only update requested channels */
-
-        if ((bitmask & (1 << ch)) == 0) {
-            continue;
-        }
-
-        for (i = 0; i < gammaRampSize; i++) {
-            gammaRamp[ch][i] =
-                ComputeGammaRampVal(gammaRampSize,
-                                    i,
-                                    pGammaInput->contrast[ch],
-                                    pGammaInput->brightness[ch],
-                                    pGammaInput->gamma[ch]);
-        }
-    }
-}
-
-void NvCtrlAssignGammaInput(NvCtrlGammaInput *pGammaInput,
-                            const float inContrast[3],
-                            const float inBrightness[3],
-                            const float inGamma[3],
-                            const unsigned int bitmask)
-{
-    int ch;
-
-    /* clamp input, but only the input specified in the bitmask */
-
-    for (ch = FIRST_COLOR_CHANNEL; ch <= LAST_COLOR_CHANNEL; ch++) {
-
-        /* only update requested channels */
-
-        if ((bitmask & (1 << ch)) == 0) {
-            continue;
-        }
-
-        if (bitmask & CONTRAST_VALUE) {
-            if (inContrast[ch] > CONTRAST_MAX) {
-                pGammaInput->contrast[ch] = CONTRAST_MAX;
-            } else if (inContrast[ch] < CONTRAST_MIN) {
-                pGammaInput->contrast[ch] = CONTRAST_MIN;
-            } else {
-                pGammaInput->contrast[ch] = inContrast[ch];
-            }
-        }
-
-        if (bitmask & BRIGHTNESS_VALUE) {
-            if (inBrightness[ch] > BRIGHTNESS_MAX) {
-                pGammaInput->brightness[ch] = BRIGHTNESS_MAX;
-            } else if (inBrightness[ch] < BRIGHTNESS_MIN) {
-                pGammaInput->brightness[ch] = BRIGHTNESS_MIN;
-            } else {
-                pGammaInput->brightness[ch] = inBrightness[ch];
-            }
-        }
-
-        if (bitmask & GAMMA_VALUE) {
-            if (inGamma[ch] > GAMMA_MAX) {
-                pGammaInput->gamma[ch] = GAMMA_MAX;
-            } else if (inGamma[ch] < GAMMA_MIN) {
-                pGammaInput->gamma[ch] = GAMMA_MIN;
-            } else {
-                pGammaInput->gamma[ch] = inGamma[ch];
-            }
-        }
-    }
-}
-
-
 NvCtrlEventHandle *NvCtrlGetEventHandle(const CtrlTarget *ctrl_target)
 {
     NvCtrlEventPrivateHandle *evt_h;
@@ -1674,28 +1269,12 @@ NvCtrlEventHandle *NvCtrlGetEventHandle(const CtrlTarget *ctrl_target)
         evt_h->dpy = h->dpy;
         evt_h->fd = ConnectionNumber(h->dpy);
         evt_h->nvctrl_event_base = (h->nv) ? h->nv->event_base : -1;
-        evt_h->xrandr_event_base = (h->xrandr) ? h->xrandr->event_base : -1;
 
         /* Add it to the list of event handles */
         evt_hnode = nvalloc(sizeof(*evt_hnode));
         evt_hnode->handle = evt_h;
         evt_hnode->next = __event_handles;
         __event_handles = evt_hnode;
-    }
-
-    /*
-     * This next bit of code is to make sure that the xrandr_event_base
-     * for this event handle is valid in the case where a NON X Screen
-     * target type handle is used to create the initial event handle
-     * (Resulting in xrandr_event_base being == -1), followed by an
-     * X Screen target type handle registering itself to receive
-     * XRandR events on the existing dpy/event handle.
-     */
-    if (evt_h->xrandr_event_base == -1 &&
-        h->target_type == X_SCREEN_TARGET &&
-        h->xrandr) {
-
-        evt_h->xrandr_event_base = h->xrandr->event_base;
     }
 
     return (NvCtrlEventHandle *)evt_h;
@@ -1777,23 +1356,6 @@ NvCtrlEventHandlePending(NvCtrlEventHandle *handle, Bool *pending)
     }
 
     return NvCtrlSuccess;
-}
-
-static int get_screen_of_root(Display *dpy, Window root)
-{
-    int screen = -1;
-
-    /* Find the screen the window belongs to */
-    screen = XScreenCount(dpy);
-
-    while (screen > 0) {
-        screen--;
-        if (root == RootWindow(dpy, screen)) {
-            break;
-        }
-    }
-    
-    return screen;
 }
 
 ReturnStatus
@@ -1918,37 +1480,6 @@ NvCtrlEventHandleNextEvent(NvCtrlEventHandle *handle, CtrlEvent *event)
             return NvCtrlSuccess;
         }
     }
-
-
-    /*
-     * Handle XRandR events
-     */
-    if (evt_h->xrandr_event_base != -1) {
-
-        int rrevt_type = xevent.type - evt_h->xrandr_event_base;
-
-        /*
-         * Handle the RRScreenChangeNotify event
-         */
-        if (rrevt_type == RRScreenChangeNotify) {
-
-            XRRScreenChangeNotifyEvent *xrandrevent =
-                (XRRScreenChangeNotifyEvent *)&xevent;
-
-            event->type        = CTRL_EVENT_TYPE_SCREEN_CHANGE;
-            event->target_type = X_SCREEN_TARGET;
-            event->target_id   = get_screen_of_root(xrandrevent->display,
-                                                    xrandrevent->root);
-
-            event->screen_change.width   = xrandrevent->width;
-            event->screen_change.height  = xrandrevent->height;
-            event->screen_change.mwidth  = xrandrevent->mwidth;
-            event->screen_change.mheight = xrandrevent->mheight;
-
-            return NvCtrlSuccess;
-        }
-    }
-
 
     /*
      * Trap events that get registered but are not handled

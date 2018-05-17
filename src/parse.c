@@ -71,12 +71,6 @@ const AttributeTableEntry attributeTable[] = {
     { "OperatingSystem",                  NV_CTRL_OPERATING_SYSTEM,                     INT_ATTR, {0,0,0,0,1,0}, { .int_flags = {0,0,0,0,0,0,0} }, "The operating system on which the X server is running.  0-Linux, 1-FreeBSD, 2-SunOS." },
     { "NvidiaDriverVersion",              NV_CTRL_STRING_NVIDIA_DRIVER_VERSION,         STR_ATTR, {0,0,0,0,1,0}, {}, "The NVIDIA X driver version." },
     { "NvControlVersion",                 NV_CTRL_STRING_NV_CONTROL_VERSION,            STR_ATTR, {0,0,0,0,1,0}, {}, "The NV-CONTROL X driver extension version." },
-    { "GLXServerVersion",                 NV_CTRL_STRING_GLX_SERVER_VERSION,            STR_ATTR, {0,0,0,0,1,0}, {}, "The GLX X server extension version." },
-    { "GLXClientVersion",                 NV_CTRL_STRING_GLX_CLIENT_VERSION,            STR_ATTR, {0,0,0,0,1,0}, {}, "The GLX client version." },
-    { "OpenGLVersion",                    NV_CTRL_STRING_GLX_OPENGL_VERSION,            STR_ATTR, {0,0,0,0,1,0}, {}, "The OpenGL version." },
-    { "XRandRVersion",                    NV_CTRL_STRING_XRANDR_VERSION,                STR_ATTR, {0,0,0,0,1,0}, {}, "The X RandR version." },
-    { "XF86VidModeVersion",               NV_CTRL_STRING_XF86VIDMODE_VERSION,           STR_ATTR, {0,0,0,0,1,0}, {}, "The XF86 Video Mode X extension version." },
-    { "XvVersion",                        NV_CTRL_STRING_XV_VERSION,                    STR_ATTR, {0,0,0,0,1,0}, {}, "The Xv X extension version." },
 
     /* X screen */
     { "Ubb",                              NV_CTRL_UBB,                                  INT_ATTR, {0,0,0,0,0,0}, { .int_flags = {0,0,0,0,0,0,0} }, "Is UBB enabled for the specified X screen." },

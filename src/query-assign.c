@@ -2232,36 +2232,6 @@ int nv_process_parsed_attribute(const Options *op,
         }
 
 
-        /* special case the color attributes */
-
-        if (a->type == CTRL_ATTRIBUTE_TYPE_COLOR) {
-            float v[3];
-            if (!assign) {
-                nv_msg(NULL, "Attribute '%s' cannot be queried.", a->name);
-                goto done;
-            }
-
-            /*
-             * assign p->val.f to all values in the array; a->attr will
-             * tell NvCtrlSetColorAttributes() which indices in the
-             * array to use
-             */
-
-            v[0] = v[1] = v[2] = p->val.f;
-
-            status = NvCtrlSetColorAttributes(t, v, v, v, a->attr);
-
-            if (status != NvCtrlSuccess) {
-                nv_error_msg("Error assigning %f to attribute '%s' on %s "
-                             "specified %s (%s)", p->val.f, a->name,
-                             t->name, whence,
-                             NvCtrlAttributesStrError(status));
-                goto done;
-            }
-
-            continue;
-        }
-
         /*
          * If we are assigning, and the value for this attribute is a
          * display device mask, then we need to validate the value against

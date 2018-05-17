@@ -43,13 +43,6 @@ typedef struct {
                           * (doesn't have to be the same as the
                           * display on which the gui is shown
                           */
-    
-    char *config;        /*
-                          * The name of the configuration file (to be
-                          * read from, and to be written to); defaults
-                          * to the value of the constant
-                          * DEFAULT_RC_FILE.
-                          */
 
     char **assignments;  /*
                           * Dynamically allocated array of assignment
@@ -71,27 +64,6 @@ typedef struct {
                           * array.
                           */
     
-    int only_load;       /*
-                          * If true, just read the configuration file,
-                          * send the attributes to the X server, and
-                          * exit.
-                          */
-
-    int no_load;         /*
-                          * If true, do not load the configuration file.
-                          * The attributes are not sent to the X Server.
-                          */
-
-    int rewrite;         /*
-                          * If true, write the X server configuration
-                          * to the configuration file and exit.
-                          */
-
-    char *page;          /*
-                          * The default page to display in the GUI
-                          * when started.
-                          */
-
     int list_targets;    /*
                           * If true, list resolved targets of operations
                           * (from query/assign or rc file) and exit.
@@ -106,22 +78,6 @@ typedef struct {
                           * If true, output the display device mask as a list
                           * of display device names instead of a number.
                           */
-
-    int write_config;    /*
-                          * If true, write out the configuration file on exit.
-                          */
-
-    int use_gtk2;        /*
-                          * If true, use GTK+ 2 user interface library
-                          */
-
-    char *gtk_lib_path;  /*
-                          * Path to the user interface library to use or to the
-                          * directory containing the library to use. In the
-                          * former case, the value of the use_gtk2 option is
-                          * ignored.
-                          */
-
 } Options;
 
 

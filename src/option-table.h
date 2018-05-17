@@ -39,47 +39,12 @@ static const NVGetoptOption __options[] = {
     { "help", 'h', NVGETOPT_HELP_ALWAYS, NULL,
       "Print usage information and exit." },
 
-    { "config", CONFIG_FILE_OPTION,
-      NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
-      "Use the configuration file &CONFIG& rather than the "
-      "default &" DEFAULT_RC_FILE "&" },
-
     { "ctrl-display", 'c',
       NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
       "Control the specified X display.  If this option is not given, then "
       "^nvidia-settings^ will control the display specified by ^'--display'^; "
       "if that is not given, then the &$DISPLAY& environment "
       "variable is used." },
-
-    /*
-     * This is a silent, hidden option for the GTK argument that we treat
-     * identically to the above "ctrl-display" option.
-     */
-    { "display", DISPLAY_OPTION, NVGETOPT_STRING_ARGUMENT, NULL, NULL },
-
-    { "load-config-only", 'l', NVGETOPT_HELP_ALWAYS, NULL,
-      "Load the configuration file, send the values specified therein to "
-      "the X server, and exit.  This mode of operation is useful to place "
-      "in your xinitrc file, for example." },
-
-    { "no-config", 'n', NVGETOPT_HELP_ALWAYS, NULL,
-      "Do not load the configuration file.  This mode of operation is useful "
-      "if ^nvidia-settings^ has difficulties starting due to problems with "
-      "applying settings in the configuration file." },
-
-    { "rewrite-config-file", 'r', NVGETOPT_HELP_ALWAYS, NULL,
-      "Write the X server configuration to the configuration file, and exit, "
-      "without starting the graphical user interface.  See EXAMPLES section." },
-
-    { "verbose", 'V',
-      NVGETOPT_STRING_ARGUMENT | NVGETOPT_ARGUMENT_IS_OPTIONAL |
-      NVGETOPT_HELP_ALWAYS, NULL,
-      "Controls how much information is printed.  Valid values are ^'none'^ "
-      "(do not print status messages), ^'errors'^ (print error messages), "
-      "^'deprecations'^ (print error and deprecation messages), ^'warnings'^ "
-      "(print error, deprecation, and warning messages), and ^'all'^ (print "
-      "error, deprecation, warning and other informational messages).  By "
-      "default, ^'deprecations'^ is set." },
 
     { "assign", 'a', NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
       "The &ASSIGN& argument to the ^'--assign'^ command line option is of the "
@@ -153,61 +118,10 @@ static const NVGetoptOption __options[] = {
       "as a list of display devices (e.g., \"CRT-0, DFP-0\"), rather than "
       "a hexadecimal bit mask (e.g., 0x00010001)." },
 
-    { "glxinfo", 'g', NVGETOPT_HELP_ALWAYS, NULL,
-      "Print GLX Information for the X display and exit." },
-
-    { "eglinfo", 'E', NVGETOPT_HELP_ALWAYS, NULL,
-      "Print EGL Information for the X display and exit." },
-
     { "describe", 'e', NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
       "Prints information about a particular attribute.  Specify 'all' to "
       "list the descriptions of all attributes.  Specify 'list' to list the "
       "attribute names without a descriptions." },
-
-    { "page", 'p', NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
-      "The &PAGE& argument to the ^'--page'^ commandline option selects a "
-      "particular page in the nvidia-settings user interface to display "
-      "upon starting nvidia-settings.  Valid values are the page names "
-      "in the tree view on the left side of the nvidia-settings user "
-      "interface; e.g.,\n"
-      "\n"
-      TAB "--page=\"X Screen 0\"\n"
-      "\n"
-      "Because some page names are not unique (e.g., a \"PowerMizer\" page is "
-      "present under each GPU), the page name can optionally be prepended "
-      "with the name of the parent X Screen or GPU page, followed by a comma.  "
-      "E.g.,\n"
-      "\n"
-      TAB "--page=\"GPU 0 - (Quadro 6000), PowerMizer\"\n"
-      "\n"
-      "The first page with a name matching the &PAGE& argument will be used.  "
-      "By default, the \"X Server Information\" page is displayed." },
-
-    { "list-targets-only", 'L', NVGETOPT_HELP_ALWAYS, NULL,
-      "When performing an attribute query (from the '--query' command line "
-      "option) or an attribute assignment (from the '--assign' command line "
-      "option or when loading an ~/.nvidia-settings-rc file), nvidia-settings "
-      "identifies one or more targets on which to query/assign the attribute.\n"
-      "\n"
-      "The '--list-targets-only' option will cause nvidia-settings to list the "
-      "targets on which the query/assign operation would have been performed, "
-      "without actually performing the operation(s), and exit." },
-
-    { "write-config", 'w', NVGETOPT_IS_BOOLEAN | NVGETOPT_HELP_ALWAYS, NULL,
-      "Save the configuration file on exit (enabled by default)." },
-
-    { "use-gtk2", 'i', NVGETOPT_HELP_ALWAYS, NULL, "Force nvidia-settings to "
-      "use the GTK+ 2 library for the graphical user interface if a user "
-      "interface is required. This option is only available on systems where "
-      "nvidia-settings supports both the GTK+ 2 and GTK+ 3 user "
-      "interfaces.\n" },
-
-    { "gtk-library", 'I', NVGETOPT_STRING_ARGUMENT | NVGETOPT_HELP_ALWAYS, NULL,
-      "Specify the graphical user interface library to use if a "
-      "nvidia-settings user interface is required. This value may be the exact "
-      "location of the library or it may be the directory containing the "
-      "appropriately named library. If this is the exact location, the "
-      "'use-gtk2' option is ignored.\n" },
 
     { NULL, 0, 0, NULL, NULL},
 };
