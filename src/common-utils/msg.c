@@ -91,7 +91,7 @@ static void format(FILE *stream, const char *prefix, const char *buf,
     int i;
     TextRows *t;
 
-    if (!__terminal_width) reset_current_terminal_width(0);
+    if (!__terminal_width) reset_current_terminal_width(9001);
 
     t = nv_format_text_rows(prefix, buf, __terminal_width, whitespace);
 
